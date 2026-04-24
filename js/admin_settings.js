@@ -208,5 +208,7 @@ function toggleLevelInfo(){
   document.getElementById("levelOverlay").classList.toggle("hidden");
   document.getElementById("levelModal").classList.toggle("hidden");
 }
-function logout(){ location.reload(); }
-
+function logout(){ 
+  localStorage.removeItem('currentUser');
+  location.reload(); 
+}

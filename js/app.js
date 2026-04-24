@@ -114,6 +114,55 @@ document.addEventListener('click', (e)=>{
   buildColorPicker();
   pomoRender();
 
-  /* ── Init role UI ── */
-  selectRole("siswa");
+  /* ── Init role UI OR Restore Session ── */
+  const savedUser = localStorage.getItem('currentUser');
+  if (savedUser) {
+    currentUser = JSON.parse(savedUser);
+    const role = currentUser.role;
+    
+    document.getElementById("authPage").classList.add("hidden");
+    document.getElementById("dashboard").classList.remove("hidden");
+
+    updateNavUser();
+    setupTabsForRole(role);
+
+    if(role === "guru"){
+      document.getElementById("editPanel").classList.remove("hidden");
+      document.getElementById("homeworkEditor").classList.remove("hidden");
+      document.getElementById("announcementEditor").classList.remove("hidden");
+      document.getElementById("resourceEditor").classList.remove("hidden");
+    }
+
+    const hpw = document.getElementById("hubPulseWrap");
+    if(hpw) hpw.classList.toggle("hidden", role !== "guru");
+
+    document.getElementById("feedbackNavBtn").classList.remove("hidden");
+    document.getElementById("redirectUrl").value = window.location.href;
+
+    if(role === "admin"){
+      renderAdminPanel();
+    } else {
+      ensureClassData(currentUser.kelas);
+      migrateLegacyData(currentUser.kelas);
+      renderSchedule();
+      renderHomework();
+      if(role === "siswa"){
+        renderProgress();
+        renderXpChart();
+        renderNotes();
+        renderSubmissionHistory();
+        const fab = document.getElementById('pomoFab');
+        if(fab) fab.classList.add('visible');
+        const tog = document.getElementById('schedViewToggle');
+        if(tog) tog.style.display = 'flex';
+      }
+      renderAnnouncements();
+      renderResources();
+      renderClassroomPulse();
+      renderLeaderboard();
+      updateNotificationDots();
+    }
+  } else {
+    selectRole("siswa");
+  }
 })();

@@ -31,6 +31,7 @@ function login(){
       currentUser = {role, kelas:""};
     }
 
+    localStorage.setItem('currentUser', JSON.stringify(currentUser));
     showAuthMessage(t('errLoginOk'), "success", 900);
 
     setTimeout(()=>{
