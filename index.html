@@ -108,26 +108,28 @@
         <button class="secondary" style="padding:7px 14px;font-size:13px;" onclick="toggleAccountSettings()">✕ Tutup</button>
       </div>
       <div id="studentSettings">
-        <p class="subtle" style="margin-bottom:12px;">Ubah foto profil dan password akun siswa.</p>
+        <p class="subtle" style="margin-bottom:12px;">Ubah foto profil, nama, dan password akun siswa.</p>
         <div class="form-block">
           <div class="form-block-title">📷 Foto Profil</div>
           <input id="profilePhoto" type="file" accept="image/*" style="margin-bottom:8px;">
           <button class="secondary" style="font-size:13px;padding:8px 14px;" onclick="removeProfilePhoto()">🗑 Hapus Foto</button>
         </div>
         <div class="form-block">
-          <div class="form-block-title">🔑 Ubah Password</div>
-          <input id="newPassword" type="password" placeholder="Password baru">
+          <div class="form-block-title">👤 Profil &amp; Akun</div>
+          <input id="newProfileName" type="text" placeholder="Nama Lengkap">
+          <input id="newPassword" type="password" placeholder="Password baru" style="margin-top:8px;">
           <input id="confirmPassword" type="password" placeholder="Ulangi password baru">
           <button onclick="saveProfile()" style="margin-top:10px;">Simpan</button>
         </div>
       </div>
       <div id="teacherSettings" class="hidden">
-        <p class="subtle" style="margin-bottom:12px;">Ubah password akun guru.</p>
+        <p class="subtle" style="margin-bottom:12px;">Ubah profil dan password akun guru.</p>
         <div class="form-block">
-          <div class="form-block-title">🔑 Ubah Password</div>
-          <input id="newTeacherPassword" type="password" placeholder="Password baru">
+          <div class="form-block-title">👤 Profil &amp; Akun</div>
+          <input id="newTeacherName" type="text" placeholder="Nama Lengkap (Contoh: Bpk. Budi)">
+          <input id="newTeacherPassword" type="password" placeholder="Password baru" style="margin-top:8px;">
           <input id="confirmTeacherPassword" type="password" placeholder="Ulangi password baru">
-          <button onclick="saveTeacherPassword()" style="margin-top:10px;">Simpan</button>
+          <button onclick="saveTeacherSettings()" style="margin-top:10px;">Simpan</button>
         </div>
       </div>
     </div>

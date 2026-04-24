@@ -122,7 +122,8 @@ function updateNavUser(){
     badge.className    = "badge badge-danger";
     avEl.src = "profileempty.jpg.jpeg";
   } else if(currentUser.role === "guru"){
-    nameEl.textContent = t('guruLabel') + " " + currentUser.kelas;
+    const rawName = studentProfiles[currentUser.kelas]?.name;
+    nameEl.textContent = rawName ? rawName : (t('guruLabel') + " " + currentUser.kelas);
     badge.textContent  = "GURU";
     badge.className    = "badge badge-success";
     avEl.src = "profileempty.jpg.jpeg";

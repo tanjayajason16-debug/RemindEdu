@@ -150,18 +150,29 @@ function toggleAccountSettings(){
   if(currentUser.role==="guru"){ ss?.classList.add("hidden"); ts?.classList.remove("hidden"); }
   else { ss?.classList.remove("hidden"); ts?.classList.add("hidden"); }
 }
+
 function saveProfile(){
   if(!currentUser||currentUser.role!=="siswa") return;
   const sk=getStudentKey(); if(!sk) return;
+  
+  const nn=document.getElementById("newProfileName") ? document.getElementById("newProfileName").value.trim() : "";
   const np=document.getElementById("newPassword").value;
   const cp=document.getElementById("confirmPassword").value;
   const pi=document.getElementById("profilePhoto");
+
+  if(nn) {
+    if(!studentProfiles[sk]) studentProfiles[sk]={};
+    studentProfiles[sk].name = nn;
+    localStorage.setItem("studentProfiles",JSON.stringify(studentProfiles));
+  }
+
   if(np||cp){
     if(np.length<4) return showAuthMessage("Password minimal 4 karakter.");
     if(np!==cp)     return showAuthMessage("Password tidak sama.");
     studentPasswords[sk]=np;
     localStorage.setItem("studentPasswords",JSON.stringify(studentPasswords));
   }
+  
   if(pi?.files?.[0]){
     const reader=new FileReader();
     reader.onload=()=>{
@@ -169,14 +180,23 @@ function saveProfile(){
       studentProfiles[sk].photo=reader.result;
       localStorage.setItem("studentProfiles",JSON.stringify(studentProfiles));
       renderProgress();
+      updateNavUser();
     };
     reader.readAsDataURL(pi.files[0]);
+  } else {
+    renderProgress();
+    updateNavUser();
   }
+  
+  if(document.getElementById("newProfileName")) document.getElementById("newProfileName").value="";
   document.getElementById("newPassword").value="";
   document.getElementById("confirmPassword").value="";
   if(pi) pi.value="";
-  renderProgress();
+
+  alert("Profil berhasil diperbarui!");
+  toggleAccountSettings();
 }
+
 function removeProfilePhoto(){
   if(!currentUser||currentUser.role!=="siswa") return;
   const sk=getStudentKey(); if(!sk) return;
@@ -185,18 +205,37 @@ function removeProfilePhoto(){
   localStorage.setItem("studentProfiles",JSON.stringify(studentProfiles));
   const pi=document.getElementById("profilePhoto"); if(pi) pi.value="";
   renderProgress();
+  updateNavUser();
 }
-function saveTeacherPassword(){
+
+function saveTeacherSettings(){
   if(!currentUser||currentUser.role!=="guru") return;
+  
+  const nn=document.getElementById("newTeacherName") ? document.getElementById("newTeacherName").value.trim() : "";
   const np=document.getElementById("newTeacherPassword").value;
   const cp=document.getElementById("confirmTeacherPassword").value;
-  if(np.length<4) return showAuthMessage(t('pwdMinLength'));
-  if(np!==cp)     return showAuthMessage(t('pwdNotMatch'));
-  teacherPasswords[currentUser.kelas]=np;
-  localStorage.setItem("teacherPasswords",JSON.stringify(teacherPasswords));
-  document.getElementById("newTeacherPassword").value="";
-  document.getElementById("confirmTeacherPassword").value="";
-  alert(t('pwdUpdated'));
+  
+  if(nn) {
+    // We can store teacher names in studentProfiles using the class name as the key
+    if(!studentProfiles[currentUser.kelas]) studentProfiles[currentUser.kelas]={};
+    studentProfiles[currentUser.kelas].name = nn;
+    localStorage.setItem("studentProfiles",JSON.stringify(studentProfiles));
+    updateNavUser();
+  }
+
+  if(np || cp){
+    if(np.length<4) return showAuthMessage(t('pwdMinLength'));
+    if(np!==cp)     return showAuthMessage(t('pwdNotMatch'));
+    teacherPasswords[currentUser.kelas]=np;
+    localStorage.setItem("teacherPasswords",JSON.stringify(teacherPasswords));
+  }
+
+  if(document.getElementById("newTeacherName")) document.getElementById("newTeacherName").value="";
+  if(document.getElementById("newTeacherPassword")) document.getElementById("newTeacherPassword").value="";
+  if(document.getElementById("confirmTeacherPassword")) document.getElementById("confirmTeacherPassword").value="";
+  
+  alert("Akun Guru berhasil diperbarui!");
+  toggleAccountSettings();
 }
 
 /* ── Modals ── */
