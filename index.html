@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Remind.Edu — SMP Karangturi</title>
+<meta name="description" content="Platform manajemen kelas digital SMP Karangturi — jadwal, tugas, pengumuman, dan perkembangan siswa dalam satu tempat.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#6366f1">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ═══════════════════════ AUTH PAGE ═══════════════════════ -->
+<div id="authPage">
+  <div class="auth-orb orb1"></div>
+  <div class="auth-orb orb2"></div>
+  <div class="auth-orb orb3"></div>
+
+  <div class="login-card">
+    <img src="logo.png" alt="RemindEdu" class="login-logo">
+    <h1 class="login-title">Remind.Edu</h1>
+    <p class="login-subtitle" id="loginSubtitle">SMP Karangturi &mdash; Platform Kelas Digital</p>
+
+    <!-- Role selector -->
+    <div class="role-bar" id="rolePillBar">
+      <button type="button" class="role-pill active" data-role="siswa" onclick="selectRole('siswa')">👤 Siswa</button>
+      <button type="button" class="role-pill" data-role="guru"  onclick="selectRole('guru')">👨‍🏫 Guru</button>
+      <button type="button" class="role-pill" data-role="admin" onclick="selectRole('admin')">🔑 Admin</button>
+    </div>
+
+    <!-- Hidden role value -->
+    <input type="hidden" id="role" value="siswa">
+
+    <form id="login-form">
+      <div id="classSelectWrap">
+        <label class="field-label" for="classSelect">Kelas</label>
+        <select id="classSelect"><option value="">— Pilih Kelas —</option></select>
+      </div>
+
+      <div id="absentSelectWrap">
+        <label class="field-label" for="absentSelect">Nomor Absen</label>
+        <select id="absentSelect"><option value="">— Pilih Absen —</option></select>
+      </div>
+
+      <label class="field-label" for="password" style="margin-top:10px;">Password</label>
+      <input type="password" id="password" placeholder="••••••••" required>
+
+      <button type="submit" class="auth-btn" id="loginBtn">Masuk →</button>
+    </form>
+    <p id="message" class="message"></p>
+  </div>
+  <button class="auth-settings-btn" id="authSettingsBtn" onclick="toggleSettingsPanel()" title="Settings">⚙</button>
+</div>
+
+<!-- hidden compat elements -->
+<span id="welcome"     class="hidden"></span>
+<span id="studentMeta" class="hidden"></span>
+<img  id="profilePic"  class="hidden" alt="">
+<button id="accountBtn" class="hidden"></button>
+
+<!-- ═══════════════════════ DASHBOARD ═══════════════════════ -->
+<div id="dashboard" class="hidden">
+
+  <!-- Top Nav -->
+  <nav id="appNav">
+    <div class="nav-brand">
+      <img src="logo.png" alt="RemindEdu Logo">
+      <div>
+        <span class="nav-brand-name">Remind.Edu</span>
+        <span class="nav-brand-sub">SMP Karangturi</span>
+      </div>
+    </div>
+
+    <div id="navTabs" role="tablist"><!-- filled by JS --></div>
+
+    <div class="nav-right">
+      <button id="feedbackNavBtn" class="nav-btn feedback hidden" onclick="toggleFeedbackForm()">💬 Saran</button>
+      <div class="nav-user-chip" id="navUserChip" onclick="toggleAccountSettings()">
+        <img id="navAvatar" class="nav-av" src="profileempty.jpg.jpeg" alt="User">
+        <span class="nav-user-name" id="navUserName">—</span>
+        <span id="roleBadge" class="badge badge-primary">—</span>
+      </div>
+      <button class="nav-btn" id="settingsNavBtn" onclick="toggleSettingsPanel()" title="Settings" style="padding:7px 12px;font-size:15px;">⚙</button>
+      <button class="nav-btn logout" id="logoutBtn" onclick="logout()">Keluar</button>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="dash-wrap">
+
+    <!-- Admin View Banner -->
+    <div id="adminViewBar" class="hidden">
+      <div>
+        <strong style="color:var(--warning);">👁 Admin View Mode</strong>
+        <div class="subtle" style="margin-top:2px;font-size:13px;color:var(--text2);">Sedang melihat sebagai pengguna lain</div>
+      </div>
+      <button class="secondary" onclick="exitAdminView()" style="border-color:rgba(245,158,11,.3);color:var(--warning);">⬅ Kembali ke Admin</button>
+    </div>
+
+    <!-- Account Settings (shared overlay-style card) -->
+    <div class="card hidden" id="accountSettings" style="margin-bottom:20px;">
+      <div class="list-row" style="margin-bottom:16px;">
+        <h3>⚙ Account Settings</h3>
+        <button class="secondary" style="padding:7px 14px;font-size:13px;" onclick="toggleAccountSettings()">✕ Tutup</button>
+      </div>
+      <div id="studentSettings">
+        <p class="subtle" style="margin-bottom:12px;">Ubah foto profil dan password akun siswa.</p>
+        <div class="form-block">
+          <div class="form-block-title">📷 Foto Profil</div>
+          <input id="profilePhoto" type="file" accept="image/*" style="margin-bottom:8px;">
+          <button class="secondary" style="font-size:13px;padding:8px 14px;" onclick="removeProfilePhoto()">🗑 Hapus Foto</button>
+        </div>
+        <div class="form-block">
+          <div class="form-block-title">🔑 Ubah Password</div>
+          <input id="newPassword" type="password" placeholder="Password baru">
+          <input id="confirmPassword" type="password" placeholder="Ulangi password baru">
+          <button onclick="saveProfile()" style="margin-top:10px;">Simpan</button>
+        </div>
+      </div>
+      <div id="teacherSettings" class="hidden">
+        <p class="subtle" style="margin-bottom:12px;">Ubah password akun guru.</p>
+        <div class="form-block">
+          <div class="form-block-title">🔑 Ubah Password</div>
+          <input id="newTeacherPassword" type="password" placeholder="Password baru">
+          <input id="confirmTeacherPassword" type="password" placeholder="Ulangi password baru">
+          <button onclick="saveTeacherPassword()" style="margin-top:10px;">Simpan</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ TAB PANES ═══ -->
+
+    <!-- ADMIN: Students -->
+    <div id="pane-admin-students" class="tab-pane hidden">
+      <div class="card">
+        <div class="list-row" style="margin-bottom:16px;">
+          <h3>👤 Akun Siswa</h3>
+          <span class="badge badge-primary">Admin Panel</span>
+        </div>
+        <table id="adminStudentTable" class="schedule-table">
+          <thead><tr><th>Siswa</th><th>Password</th><th>Aksi</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ADMIN: Teachers -->
+    <div id="pane-admin-teachers" class="tab-pane hidden">
+      <div class="card">
+        <div class="list-row" style="margin-bottom:16px;">
+          <h3>👨‍🏫 Akun Guru</h3>
+          <span class="badge badge-success">Admin Panel</span>
+        </div>
+        <table id="adminTeacherTable" class="schedule-table">
+          <thead><tr><th>Kelas</th><th>Password</th><th>Aksi</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ADMIN: View As + Danger Zone -->
+    <div id="pane-admin-view" class="tab-pane hidden">
+      <div class="grid-2">
+        <div class="card admin-view-select-card">
+          <h3 style="margin-bottom:14px;">👤 Lihat Dashboard Siswa</h3>
+          <select id="adminStudentView"></select>
+          <button onclick="adminViewAsStudent()" style="margin-top:14px;width:100%;">Buka Dashboard Siswa</button>
+        </div>
+        <div class="card admin-view-select-card">
+          <h3 style="margin-bottom:14px;">👨‍🏫 Lihat Dashboard Guru</h3>
+          <select id="adminTeacherView"></select>
+          <button onclick="adminViewAsTeacher()" style="margin-top:14px;width:100%;">Buka Dashboard Guru</button>
+        </div>
+      </div>
+      <div class="card danger-card">
+        <h3 style="color:var(--danger);margin-bottom:8px;">⚠ Zona Berbahaya</h3>
+        <p class="subtle" style="margin-bottom:16px;">Reset semua data ke kondisi awal. Tidak bisa dibatalkan.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button style="background:linear-gradient(135deg,var(--success) 0%,#059669 100%);" onclick="adminExportCSV()">🖨️ Export CSV</button>
+          <button style="background:linear-gradient(135deg,var(--danger) 0%,#dc2626 100%);" onclick="resetAllData()">🗑 Reset Semua Data</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SISWA: Home/Overview -->
+    <div id="pane-overview" class="tab-pane hidden">
+      <!-- Level / XP Card — siswa only -->
+      <div class="card" id="levelCard">
+        <div class="xp-header">
+          <div class="level-badge-big" id="levelBadge">Level 1</div>
+          <div class="xp-text" id="xpText">0 / 100 XP</div>
+          <button class="info-btn" onclick="toggleLevelInfo()" title="Info Level">?</button>
+        </div>
+        <div class="progress-wrap"><div class="progress-bar" id="xpBar" style="width:0%"></div></div>
+        <div class="badge-row" id="badgeRow">
+          <div></div>
+          <div class="chip" id="streakChip">Streak 0 hari</div>
+        </div>
+      </div>
+
+      <!-- Classroom Pulse -->
+      <div class="card">
+        <div class="sec-title">📊 Ringkasan Kelas</div>
+        <div class="stat-grid" id="classroomPulse"></div>
+      </div>
+
+      <!-- XP Activity Chart (siswa only) -->
+      <div class="card chart-card hidden" id="xpChartCard" style="padding:16px;">
+        <div class="chart-title" id="chartTitle">📈 Aktivitas XP — 7 Hari</div>
+        <canvas id="xpChart"></canvas>
+      </div>
+    </div>
+
+    <!-- SHARED: Assignments -->
+    <div id="pane-assignments" class="tab-pane hidden">
+      <div class="card" id="assignmentCard">
+        <div class="list-row" style="margin-bottom:4px;">
+          <h3>📚 Assignments</h3>
+          <div id="homeworkStats" class="subtle"></div>
+        </div>
+
+        <!-- Teacher add form -->
+        <div class="hidden form-block" id="homeworkEditor">
+          <div class="form-block-title">➕ Tambah Assignment</div>
+          <input id="hwTitle" placeholder="Judul tugas">
+          <input id="hwDue" type="date">
+          <input id="hwDesc" placeholder="Deskripsi singkat (opsional)">
+          <button onclick="addHomework()" style="margin-top:10px;">Tambah</button>
+        </div>
+
+        <table id="homeworkTable" class="schedule-table">
+          <thead><tr><th>Judul</th><th>Deadline</th><th>Aksi</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <!-- Teacher: Approval requests -->
+      <div class="card hidden" id="approvalPanel">
+        <h3 style="margin-bottom:14px;">✅ Approval Requests</h3>
+        <table id="approvalTable" class="schedule-table">
+          <thead><tr><th>Siswa</th><th>Tugas</th><th>Dikirim</th><th>Aksi</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <!-- Submission History (siswa) -->
+      <div class="hidden" id="historySection">
+        <div class="history-wrap">
+          <div class="sec-title" id="historyTitle">📋 Riwayat Pengumpulan</div>
+          <div id="historyList"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SHARED: Schedule -->
+    <div id="pane-schedule" class="tab-pane hidden">
+      <!-- Teacher: Add Schedule -->
+      <div class="card hidden" id="editPanel">
+        <h3 style="margin-bottom:14px;">📝 Tambah Jadwal Ulangan</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div>
+            <label class="field-label" for="newMapel">Mata Pelajaran</label>
+            <input id="newMapel" placeholder="cth: Matematika" style="margin:0;">
+          </div>
+          <div>
+            <label class="field-label" for="newTanggal">Tanggal</label>
+            <input id="newTanggal" placeholder="cth: 20 Februari" style="margin:0;">
+          </div>
+        </div>
+        <button onclick="addSchedule()" style="margin-top:14px;">Tambah Jadwal</button>
+      </div>
+
+      <!-- Schedule view toggle (siswa only) -->
+      <div class="cal-view-toggle" id="schedViewToggle" style="display:none;">
+        <button id="btnListView" onclick="setScheduleView('list')" style="padding:7px 16px;font-size:13px;">☰ List</button>
+        <button id="btnCalView"  onclick="setScheduleView('cal')"  style="padding:7px 16px;font-size:13px;" class="secondary">📅 Kalender</button>
+      </div>
+      <div class="card" id="scheduleCard">
+        <h3 style="margin-bottom:4px;">📅 Jadwal Ulangan</h3>
+        <table id="scheduleTable" class="schedule-table">
+          <thead><tr><th>Mata Pelajaran</th><th>Tanggal</th><th>Aksi</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="card hidden" id="calendarView" style="padding:16px;"></div>
+    </div>
+
+    <!-- SHARED: Classroom Hub -->
+    <div id="pane-hub" class="tab-pane hidden">
+      <div class="card" id="hubCard">
+        <h3 style="margin-bottom:20px;">🏫 Classroom Hub</h3>
+        <div class="grid-2">
+          <div>
+            <div class="sec-title">📢 Pengumuman</div>
+            <ul id="announcementList" class="clean-list"></ul>
+            <div class="hidden form-block" id="announcementEditor">
+              <div class="form-block-title">Tulis Pengumuman</div>
+              <input id="announcementText" placeholder="Isi pengumuman...">
+              <button onclick="addAnnouncement()" style="margin-top:8px;width:100%;">Kirim</button>
+            </div>
+          </div>
+          <div>
+            <div class="sec-title">📖 Materi &amp; Tautan</div>
+            <ul id="resourceList" class="clean-list"></ul>
+            <div class="hidden form-block" id="resourceEditor">
+              <div class="form-block-title">Tambah Materi</div>
+              <input id="resourceTitle" placeholder="Judul materi">
+              <input id="resourceUrl" placeholder="https://...">
+              <button onclick="addResource()" style="margin-top:8px;width:100%;">Tambah</button>
+            </div>
+          </div>
+        </div>
+        <!-- Classroom pulse for guru -->
+        <div style="margin-top:20px;" id="hubPulseWrap" class="hidden">
+          <div class="sec-title">📊 Ringkasan Kelas</div>
+          <div class="stat-grid" id="classroomPulse"></div>
+        </div>
+        <!-- Leaderboard (siswa + guru) -->
+        <div id="leaderboardSection" style="margin-top:24px;" class="hidden">
+          <div class="sec-title" id="lbTitle">🏆 Leaderboard Kelas</div>
+          <div class="leaderboard-list" id="leaderboardList"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SISWA: Notes -->
+    <div id="pane-notes" class="tab-pane hidden">
+      <div class="card">
+        <div class="list-row" style="margin-bottom:16px;">
+          <h3 id="notesHeading">🗒️ Catatan Belajar</h3>
+          <button onclick="openNoteEditor(null)" style="padding:8px 16px;font-size:13px;">➕ <span id="btnAddNote">Tambah</span></button>
+        </div>
+        <div class="notes-grid" id="notesGrid"></div>
+      </div>
+    </div>
+
+  </div><!-- end dash-wrap -->
+
+  <!-- Mobile Bottom Tab Bar -->
+  <div id="mobileTabs" role="tablist"><!-- filled by JS --></div>
+
+  <!-- Pomodoro FAB (siswa only) -->
+  <button class="pomo-fab" id="pomoFab" onclick="togglePomoPanel()" title="Study Timer">⏱</button>
+  <div class="pomo-panel hidden" id="pomoPanel">
+    <div class="pomo-ring" id="pomoRing" style="--pct:0">
+      <span class="pomo-time" id="pomoTime">25:00</span>
+    </div>
+    <div class="pomo-label" id="pomoLabel">🎯 Fokus Belajar</div>
+    <div class="pomo-btns">
+      <button class="pomo-btn" id="pomoStart" onclick="pomoToggle()">▶ Start</button>
+      <button class="pomo-btn secondary" onclick="pomoReset()">↺ Reset</button>
+    </div>
+    <div class="pomo-count" id="pomoCount">Sesi: 0 🍅</div>
+  </div>
+
+</div><!-- end dashboard -->
+
+
+<!-- ═══════════════════════ SETTINGS PANEL ═══════════════════════ -->
+<div id="settingsPanel" class="settings-panel hidden">
+  <div class="settings-panel-title" id="settingsPanelTitle">⚙ Pengaturan</div>
+  <div class="settings-row">
+    <span class="settings-label" id="stThemeLabel">Tema</span>
+    <div class="toggle-group">
+      <button class="tog-btn active" id="togDark"  onclick="setTheme('dark')">🌙 Gelap</button>
+      <button class="tog-btn"        id="togLight" onclick="setTheme('light')">☀️ Terang</button>
+    </div>
+  </div>
+  <div class="settings-row">
+    <span class="settings-label" id="stLangLabel">Bahasa</span>
+    <div class="toggle-group">
+      <button class="tog-btn active" id="togID" onclick="setLang('id')">🇮🇩 Indonesia</button>
+      <button class="tog-btn"        id="togEN" onclick="setLang('en')">🇬🇧 English</button>
+    </div>
+  </div>
+  <div class="settings-row">
+    <span class="settings-label" id="stColorLabel">Warna</span>
+    <div class="color-picker-row" id="colorPicker"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ MODALS ═══════════════════════ -->
+
+<!-- Feedback -->
+<div id="feedbackOverlay" class="modal-overlay hidden" onclick="toggleFeedbackForm()"></div>
+<div id="feedbackModal" class="modal hidden">
+  <div class="list-row" style="margin-bottom:16px;">
+    <h3>💬 Kritik &amp; Saran</h3>
+    <button class="secondary" onclick="toggleFeedbackForm()" style="padding:7px 14px;font-size:13px;">✕</button>
+  </div>
+  <form id="feedbackForm" action="https://formsubmit.co/remindedus@gmail.com" method="POST">
+    <input type="text" name="name" placeholder="Nama Lengkap" required>
+    <input type="email" name="email" placeholder="Email" required>
+    <select name="type" required>
+      <option value="">— Jenis Feedback —</option>
+      <option value="Kritik">Kritik</option>
+      <option value="Saran">Saran</option>
+    </select>
+    <textarea name="message" placeholder="Tulis pesan Anda..." required style="min-height:100px;margin-top:8px;"></textarea>
+    <input type="hidden" name="_captcha" value="false">
+    <input type="hidden" name="_next" value="" id="redirectUrl">
+    <div style="display:flex;gap:10px;margin-top:14px;">
+      <button type="submit" style="flex:1;">Kirim</button>
+      <button type="button" class="secondary" onclick="toggleFeedbackForm()" style="flex:1;">Batal</button>
+    </div>
+  </form>
+</div>
+
+<!-- Level Info -->
+<div id="levelOverlay" class="modal-overlay hidden" onclick="toggleLevelInfo()"></div>
+<div id="levelModal" class="modal hidden">
+  <div class="list-row" style="margin-bottom:16px;">
+    <h3>🏆 Info Level &amp; Badge</h3>
+    <button class="secondary" onclick="toggleLevelInfo()" style="padding:7px 14px;font-size:13px;">✕</button>
+  </div>
+  <p class="subtle" style="margin-bottom:14px;">Level naik setiap 100 XP. Kerjakan tugas lebih awal untuk poin lebih banyak!</p>
+  <div style="display:flex;flex-direction:column;gap:8px;">
+    <div class="list-item"><strong style="color:var(--accent2);">⭐ Explorer</strong> &mdash; 100 XP</div>
+    <div class="list-item"><strong style="color:var(--warning);">🏅 Achiever</strong> &mdash; 250 XP</div>
+    <div class="list-item"><strong style="color:var(--danger);">👑 Master</strong> &mdash; 500 XP</div>
+  </div>
+  <button onclick="toggleLevelInfo()" style="width:100%;margin-top:16px;">Tutup</button>
+</div>
+
+<!-- Admin Edit Account -->
+<div id="adminEditOverlay" class="modal-overlay hidden" onclick="closeAdminEdit()"></div>
+<div id="adminEditModal" class="modal hidden">
+  <div class="list-row" style="margin-bottom:16px;">
+    <h3 id="adminEditTitle">Edit Akun</h3>
+    <button class="secondary" onclick="closeAdminEdit()" style="padding:7px 14px;font-size:13px;">✕</button>
+  </div>
+  <input type="hidden" id="adminEditKey">
+  <input type="hidden" id="adminEditType">
+  <div id="adminEditNameWrap"><input id="adminEditName" placeholder="Nama siswa"></div>
+  <input id="adminEditPass" type="password" placeholder="Password baru">
+  <div style="display:flex;gap:10px;margin-top:14px;">
+    <button onclick="saveAdminEdit()" style="flex:1;">Simpan</button>
+    <button class="secondary" onclick="closeAdminEdit()" style="flex:1;">Batal</button>
+  </div>
+</div>
+
+
+<!-- Note Editor Modal -->
+<div id="noteOverlay" class="modal-overlay hidden" onclick="closeNoteEditor()"></div>
+<div id="noteModal" class="modal hidden" style="max-width:520px;" onclick="event.stopPropagation()">
+  <input type="hidden" id="noteId">
+  <div class="list-row" style="margin-bottom:14px;">
+    <h3 id="noteModalTitle">Catatan Baru</h3>
+    <button class="secondary" onclick="closeNoteEditor()" style="padding:7px 14px;font-size:13px;">✕</button>
+  </div>
+  <input id="noteTitle"   placeholder="Judul catatan" style="margin-bottom:10px;">
+  <input id="noteSubject" placeholder="Mata pelajaran (opsional)" style="margin-bottom:10px;">
+  <textarea id="noteContent" placeholder="Isi catatan..." style="min-height:140px;resize:vertical;margin-bottom:10px;"></textarea>
+  <div style="display:flex;gap:10px;">
+    <button onclick="saveNote()" style="flex:1;">Simpan</button>
+    <button class="secondary" onclick="deleteNote()" style="background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.3);color:#ef4444;">🗑 Hapus</button>
+    <button class="secondary" onclick="closeNoteEditor()">Batal</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════ SCRIPT ═══════════════════════ -->
+<!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+
+<script src="js/config.js"></script>
+<script src="js/data_state.js"></script>
+<script src="js/ui_core.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/dashboard_components.js"></script>
+<script src="js/features.js"></script>
+<script src="js/admin_settings.js"></script>
+<script src="js/app.js"></script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').then(reg => {
+        console.log('SW Registered:', reg.scope);
+      }).catch(err => {
+        console.error('SW Registration Failed:', err);
+      });
+    });
+  }
+</script>
+</body>
+</html>

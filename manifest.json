@@ -1,0 +1,18 @@
+{
+  "name": "Remind.Edu Classroom",
+  "short_name": "Remind.Edu",
+  "description": "Platform manajemen kelas digital SMP Karangturi.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#08090f",
+  "theme_color": "#6366f1",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "192x192 512x512 any",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
