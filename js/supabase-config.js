@@ -38,14 +38,27 @@ localStorage.setItem = async function(key, value) {
 
 window.syncInitialData = async function() {
   const { data, error } = await window.supabaseClient.from('app_storage').select('*');
-  if (data) {
+  
+  if (data && data.length > 0) {
+    // Phase 1: Download from Cloud
     data.forEach(row => {
-      // Only keep local if remote data is missing, otherwise use remote data 
-      if (row.value.stringValue !== undefined) {
+      if (row.value && row.value.stringValue !== undefined) {
         originalSetItem.call(localStorage, row.key, row.value.stringValue);
       } else {
         originalSetItem.call(localStorage, row.key, JSON.stringify(row.value));
       }
     });
+  } else if (data && data.length === 0) {
+    // Phase 2: First-time setup! The cloud is empty, so we must upload this device's existing data
+    console.log("Cloud is empty. Populating with local data...");
+    for (let i = 0; i < localStorage.length; i++) {
+      let key = localStorage.key(i);
+      if (!key.startsWith('sb-') && !key.startsWith('supabase')) {
+        // Trigger the wrapper to upload the item
+        let val = localStorage.getItem(key);
+        // We use the wrapper function which triggers the supabase push
+        await localStorage.setItem(key, val);
+      }
+    }
   }
 };
