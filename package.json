@@ -1,0 +1,21 @@
+{
+  "name": "remind-edu",
+  "version": "1.0.0",
+  "description": "Platform manajemen kelas digital SMP Karangturi — jadwal, tugas, pengumuman, dan perkembangan siswa dalam satu tempat.",
+  "type": "module",
+  "scripts": {
+    "dev": "npx serve .",
+    "build": "echo 'Static site - no build needed'",
+    "lint": "echo 'No linter configured'"
+  },
+  "keywords": [
+    "education",
+    "classroom",
+    "management"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@vercel/speed-insights": "^1.0.0"
+  }
+}
